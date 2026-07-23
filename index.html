@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v6.5.1/css/all.css"
+    />
+    <title>Weather App</title>
+  </head>
+
+  <body>
+    <div class="overlay"></div>
+
+    <div class="container">
+      <!-- Theme Toggle -->
+      <button id="toogle-btn" class="theme-toggle" aria-label="Toggle theme">
+        <i class="fa-regular fa-moon fa-lg"></i>
+      </button>
+
+      <!-- Search -->
+      <header>
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="search"
+            placeholder="Search for a city..."
+            id="searchBar"
+          />
+        </div>
+        <p class="error"></p>
+      </header>
+
+      <!-- Main Content Row: Current Weather + Forecast -->
+      <div class="content-row">
+        <!-- Current Weather -->
+        <main class="weather-column">
+          <div class="weather-main">
+            <div class="iconDiv">
+              <img src="" alt="weather icon" />
+            </div>
+
+            <div class="weather-info">
+              <h2 class="temp" id="temp">--°C</h2>
+              <p class="location" id="location">Loading...</p>
+              <p class="date" id="date"></p>
+            </div>
+
+            <div class="weather-details">
+              <div class="detail-item">
+                <i class="fa-solid fa-droplet"></i>
+                <span class="detail-label">Humidity</span>
+                <span class="detail-value"><span id="humidity">--</span>%</span>
+              </div>
+              <div class="detail-item">
+                <i class="fa-solid fa-wind"></i>
+                <span class="detail-label">Wind</span>
+                <span class="detail-value"><span id="wind">--</span> km/h</span>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- 3-Day Forecast stacked vertically -->
+        <aside class="forecast-column">
+          <h3 class="forecast-column-title">
+            <i class="fa-solid fa-calendar-week"></i> 3-Day Forecast
+          </h3>
+          <div id="UpcomingDays" class="forecast-stack"></div>
+        </aside>
+      </div>
+
+      <!-- Recent Searches Cards -->
+      <section class="section-header">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Cities</h3>
+      </section>
+      <section
+        id="Last5Searches"
+        class="forecast-section recent-cards"
+      ></section>
+
+      <!-- Footer -->
+      <footer>
+        <div id="lastSearchedList"></div>
+        <span class="footer-label clear-all">Clear All History</span>
+      </footer>
+    </div>
+
+    <script type="module" src="./scripts/main.js"></script>
+  </body>
+</html>
