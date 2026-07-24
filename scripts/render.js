@@ -1,4 +1,9 @@
-import { getdayName } from "./recentSearch.js";
+// Get day name from a date string
+function getdayName(date) {
+  return new Date(date).toLocaleDateString("en-US", {
+    weekday: "long",
+  });
+}
 
 // Current weather + forecast rendering
 export const render = (data) => {

@@ -1,51 +1,91 @@
 import { getApi } from "./api.js";
 import { clearAll } from "./deletehistory.js";
-import { getdayName } from "./recentSearch.js";
-import { render, getRender, getrenderRecent } from "./render.js";
 import { gettoogle } from "./toogle.js";
+import { debounce } from "./debounce.js";
+import {
+    showSuggestions,
+    hideSuggestions,
+    handleKeyboardNavigation,
+    initSuggestionClicks,
+} from "./suggestions.js";
 
-const apiKey = "c54d4c198f53450cb2062733262307";
 const input = document.querySelector("header input");
+const errorEl = document.querySelector(".error");
 let getitems = JSON.parse(localStorage.getItem("lastSearched")) ?? [];
 let lastSearched = Array.isArray(getitems) ? getitems : [];
 
+// Load default city on startup
 let city = getitems[getitems.length - 1] ?? "Naushera";
-getApi(apiKey, city, lastSearched);
+getApi(city, lastSearched);
 
-// GET USER INPUT
+// ── Search on Enter ──────────────────────────────────────────
 input.addEventListener("keydown", async (e) => {
-    if (e.key == "Enter") {
-        city = e.target.value;
-        lastSearched = (await getApi(apiKey, city, lastSearched)) ?? lastSearched;
+    // Let suggestions.js handle navigation keys first
+    const selectedCity = handleKeyboardNavigation(e);
+    if (selectedCity) {
+        input.value = "";
+        lastSearched = (await getApi(selectedCity, lastSearched)) ?? lastSearched;
+        hideSuggestions();
+        return;
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+        const value = e.target.value.trim();
+        if (!value) return;
+        lastSearched = (await getApi(value, lastSearched)) ?? lastSearched;
+        input.value = "";
+        hideSuggestions();
     }
 });
 
-// GET LAST SEARCHED
-async function get() {
-    lastSearched = await getApi(apiKey, city, lastSearched);
-}
-get();
+// ── Search-as-you-type with debounce ─────────────────────────
+const debouncedSearch = debounce(async (query) => {
+    if (!query || query.length < 2) {
+        errorEl.textContent = "";
+        return;
+    }
+    lastSearched = (await getApi(query, lastSearched)) ?? lastSearched;
+}, 500);
 
-// RENDER CODE — render function moved to render.js to break circular dependency
+const debouncedSuggestions = debounce((query) => {
+    showSuggestions(query);
+}, 200);
 
-// TOGGLE CODE
-let toogleBtn = document.querySelector("#toogle-btn");
-toogleBtn.addEventListener("click", () => {
-    gettoogle();
+input.addEventListener("input", (e) => {
+    const value = e.target.value.trim();
+    if (value.length >= 2) {
+        debouncedSuggestions(value);
+        debouncedSearch(value);
+    } else {
+        errorEl.textContent = "";
+        hideSuggestions();
+    }
 });
 
-let lastSearchedContainer = document.querySelector("#lastSearchedList");
+// ── Click on suggestion item ─────────────────────────────────
+initSuggestionClicks(async (city) => {
+    input.value = "";
+    lastSearched = (await getApi(city, lastSearched)) ?? lastSearched;
+});
 
+// ── Click on recent search item ──────────────────────────────
+const lastSearchedContainer = document.querySelector("#lastSearchedList");
 lastSearchedContainer.addEventListener("click", (e) => {
-    let item = e.target.closest(".lastSearchedItem");
+    const item = e.target.closest(".lastSearchedItem");
     if (item) {
-        let value = item.textContent;
-        getApi(apiKey, value, lastSearched);
+        const value = item.textContent.trim();
+        getApi(value, lastSearched);
     }
 });
 
-let clear = document.querySelector(".clear-all");
-
+// ── Clear all history ────────────────────────────────────────
+const clear = document.querySelector(".clear-all");
 clear.addEventListener("click", () => {
     clearAll();
+});
+
+// ── Theme toggle ─────────────────────────────────────────────
+const toogleBtn = document.querySelector("#toogle-btn");
+toogleBtn.addEventListener("click", () => {
+    gettoogle();
 });

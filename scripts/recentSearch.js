@@ -1,52 +1,42 @@
 import { getrenderRecent } from "./render.js";
 
-const apiKey = "527dd915fabe40979c2141828262107";
+const API_KEY = "c54d4c198f53450cb2062733262307";
 
 export const getRecentSearched = (lastSearched) => {
-  let container = document.querySelector("#lastSearchedList");
-  let unique = [...new Set(lastSearched)];
-  unique = unique.slice(-5);
-  container.innerHTML = unique.map((e) => {
-    return `
-      <h1 class="lastSearchedItem">${e}</h1>
-    `;
-  }).join("");
-}
+  const container = document.querySelector("#lastSearchedList");
+  if (!container) return;
 
+  const unique = [...new Set(lastSearched)];
+  const recent = unique.slice(-5);
 
-// get day 
+  container.innerHTML = recent
+    .map(
+      (city) => `
+      <h1 class="lastSearchedItem">${city}</h1>
+    `
+    )
+    .join("");
+};
 
-
-export function getdayName(date) {
-  return new Date(date).toLocaleDateString("en-US", {
-    weekday: "long"
-  });
-}
-
-async function getFiveWeathers(apikey, city) {
-  const url = `https://api.weatherapi.com/v1/forecast.json?key=${apikey}&q=${encodeURIComponent(city)}&days=3`;
-  const respo = await fetch(url);
-  if (!respo.ok) {
-    throw new Error("NOT FOUND");
-  }
-  return respo.json();
-}
-
+// Fetch latest weather data for the last 5 searched cities and render cards
 export const getLastFive = async () => {
-  let array = JSON.parse(localStorage.getItem("lastSearched")) ?? [];
-  let unique = [...new Set(array)];
-  let lastFive = unique.slice(-5);
+  const array = JSON.parse(localStorage.getItem("lastSearched")) ?? [];
+  const unique = [...new Set(array)];
+  const lastFive = unique.slice(-5);
 
-  console.log(lastFive)
-  let arrayOfObjects = [];
+  const results = [];
 
   for (const city of lastFive) {
     try {
-      const data = await getFiveWeathers(apiKey, city);
-      arrayOfObjects.push(data);
+      const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(city)}&days=1`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("City not found");
+      const data = await response.json();
+      results.push(data);
     } catch (error) {
-      console.log(error.message);
+      console.error(`Failed to fetch "${city}":`, error.message);
     }
   }
-  getrenderRecent(arrayOfObjects)
-}
+
+  getrenderRecent(results);
+};

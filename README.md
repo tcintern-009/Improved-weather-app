@@ -1,165 +1,55 @@
 # Weather App
 
-A modern, responsive weather application built with vanilla JavaScript that fetches real-time weather data and a 3-day forecast from a public API. Built as part of an internship task focused on asynchronous JavaScript, API integration, and modular code architecture.
+A modern, responsive weather app built with vanilla JavaScript. Search any city and get current weather, humidity, wind speed, and a 3-day forecast — all with a sleek glassmorphism UI.
 
-## Live Features
+## Features
 
-- **Search** current weather by city name
-- **Display** current temperature, condition, humidity, and wind speed
-- **3-day forecast** with daily weather icons
-- **Graceful error handling** for invalid city names
-- **Recently searched city tracking** (persisted via `localStorage`)
-- **Recent city cards** showing quick weather snapshots of your last 5 searches
-- **Dark / light mode toggle** with smooth transitions
-- **Glassmorphism UI** with animated gradient backgrounds and hover effects
+- **Search-as-you-type** — start typing and weather updates appear automatically (debounced to avoid too many API calls)
+- **Smart suggestions dropdown** — see matching city names from your search history as you type, with keyboard navigation (Arrow keys + Enter)
+- **Current weather** — temperature, condition icon, humidity, wind speed
+- **3-day forecast** — daily weather cards for the next 3 days
+- **Recent searches** — clickable city tags and weather snapshot cards for your last 5 searches (saved in localStorage)
+- **Dark / Light mode toggle** — smooth theme switching
+- **Loading & error states** — visual feedback while fetching, clear error messages for invalid cities
 
 ## Tech Stack
 
-- **HTML5** — semantic page structure
-- **CSS3** — responsive layout, glassmorphism design, CSS custom properties, flexbox
-- **JavaScript (ES6+)** — application logic, using native ES Modules
+- **HTML5** — semantic structure
+- **CSS3** — glassmorphism design, CSS custom properties, responsive layout, animations
+- **JavaScript (ES6+)** — ES Modules, Fetch API, async/await
 - **[WeatherAPI.com](https://www.weatherapi.com/)** — weather data provider
 
-No frameworks or build tools are used. This project intentionally sticks to vanilla JS to reinforce core browser APIs and language fundamentals.
+No frameworks or build tools — pure vanilla JS.
 
 ## Project Structure
 
 ```
 Weather-App/
-├── index.html              # entry point with glassmorphism card layout
-├── style.css               # full design system: themes, animations, responsive
+├── index.html                # Main HTML page
+├── style.css                 # All styles, themes, animations, responsive breakpoints
 ├── scripts/
-│   ├── main.js             # entry point: DOM references, event listeners, render orchestration
-│   ├── api.js              # fetch logic, error handling, API communication
-│   ├── render.js           # forecast card rendering (pure rendering function)
-│   ├── recentSearch.js     # last-searched city tracking + shared date utility
-│   ├── toogle.js           # dark/light mode toggle logic
-│   └── deletehistory.js    # clear all search history
+│   ├── main.js               # Entry point — event listeners, debounced search, orchestrates modules
+│   ├── api.js                # Fetch logic, error handling, loading states
+│   ├── render.js             # DOM rendering functions (current weather + forecast cards)
+│   ├── recentSearch.js       # Recent search history & weather snapshot cards
+│   ├── suggestions.js        # Search suggestions dropdown with keyboard navigation
+│   ├── debounce.js           # Debounce utility to limit rapid function calls
+│   ├── deletehistory.js      # Clear search history
+│   └── toogle.js             # Dark/light theme toggle
 └── README.md
-```
-
-### Why it's split this way
-
-Each file has a single, focused responsibility — a pattern known as **separation of concerns**:
-
-| File               | Responsibility                                                                                         |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| `main.js`          | Wires up the DOM, owns application state (`city`, `lastSearched`), delegates work to the other modules |
-| `api.js`           | Talks to the network. Knows nothing about the DOM.                                                     |
-| `render.js`        | Turns forecast data into HTML. A pure function — same input always produces the same output.           |
-| `recentSearch.js`  | Small shared utilities (date formatting) and recent-search display logic                               |
-| `toogle.js`        | Isolated UI behavior for theme switching                                                               |
-| `deletehistory.js` | Clears localStorage and resets recent search state                                                     |
-
-Splitting logic this way makes each piece independently readable, testable, and easier to debug — a change to how dates are formatted, for example, only requires touching one file.
-
-## UI / Design Highlights
-
-- **Glassmorphism card** — frosted glass effect with `backdrop-filter: blur()` and semi-transparent borders
-- **Animated gradient background** — deep teal-to-cyan gradient that shifts smoothly on theme change
-- **Light / Dark theme** — toggles via a CSS custom property system on `body.light-theme`
-- **Temperature gradient text** — the current temperature uses a `linear-gradient` text fill for a vibrant look
-- **Hover animations** — weather icon rotates and scales, cards lift with shadow, theme toggle spins
-- **Custom scrollbar** — thin accent-colored scrollbar for forecast and recent cards rows
-- **Fully responsive** — adapts from desktop down to small mobile screens
-
-## Core Concepts Applied
-
-### Fetch API + Async/Await
-
-All network requests use the native `fetch()` API wrapped in `async` functions, allowing asynchronous network calls to be written in a readable, top-to-bottom style rather than nested callbacks.
-
-```js
-async function getApi(apiKey, city, lastSearched) {
-  const response = await fetch(url);
-  const data = await response.json();
-  ...
-}
-```
-
-### Error Handling
-
-`fetch()` only rejects on network-level failures — it does **not** reject on HTTP error responses like a 404 for an invalid city. This is handled explicitly:
-
-```js
-if (!response.ok) {
-  throw new Error("Invalid City Name :(");
-}
-```
-
-All request logic is wrapped in `try...catch` to surface errors to the user through the UI rather than failing silently.
-
-### ES Modules
-
-The project uses native browser `import` / `export` syntax rather than a bundler. Each file explicitly declares what it exposes (`export`) and what it depends on (`import`), making dependencies between files explicit and traceable.
-
-```js
-// scripts/api.js
-export async function getApi(...) { ... }
-
-// scripts/main.js
-import { getApi } from "./api.js";
-```
-
-### State Passed Explicitly
-
-Rather than relying on shared global variables across modules, state (such as `lastSearched`) is passed into functions as parameters and returned back to the caller, keeping data flow explicit and predictable:
-
-```js
-lastSearched = (await getApi(apiKey, city, lastSearched)) ?? lastSearched;
-```
-
-### Persisted State with `localStorage`
-
-The list of recently searched cities is saved as JSON and rehydrated on page load, so search history survives a page refresh:
-
-```js
-localStorage.setItem("lastSearched", JSON.stringify(lastSearched));
-JSON.parse(localStorage.getItem("lastSearched")) ?? [];
 ```
 
 ## Getting Started
 
-### Prerequisites
+1. Clone the repo
+2. Open **index.html** with a local server (ES Modules require a server — use VS Code Live Server, `npx serve .`, or similar)
+3. Search for a city and see the weather!
 
-- A free API key from [WeatherAPI.com](https://www.weatherapi.com/)
-- A local development server (native ES Modules do not run over `file://` URLs)
+> **Note:** The API key is already included in `scripts/api.js` for demo purposes. In production, you'd proxy requests through a backend to keep the key private.
 
-### Setup
+## Key Concepts
 
-1. Clone the repository
-
-   ```bash
-   git clone https://github.com/your-username/weather-app.git
-   cd weather-app
-   ```
-
-2. Add your API key in `scripts/api.js`
-
-   ```js
-   const apiKey = "YOUR_API_KEY_HERE";
-   ```
-
-   Make sure `index.html` loads the entry point from the `scripts/` folder:
-
-   ```html
-   <script type="module" src="scripts/main.js"></script>
-   ```
-
-3. Serve the project locally (e.g. VS Code "Live Server" extension, or):
-
-   ```bash
-   npx serve .
-   ```
-
-4. Open the served URL in your browser.
-
-## Known Limitations / Future Improvements
-
-- API key is currently stored client-side in plain text — acceptable for a learning project, but not production-safe. A production version would proxy requests through a backend to keep the key private.
-- Forecast length is limited by the free API tier (currently 3 days).
-- No automated tests yet.
-
-## Author
-
-Built as part of an internship async JavaScript & APIs challenge.
+- **Debouncing** — searches are delayed by 500ms after you stop typing, preventing an API call on every keystroke
+- **Search-as-you-type** — suggestions appear after 200ms of inactivity, weather updates after 500ms
+- **ES Modules** — clean import/export pattern with no circular dependencies
+- **localStorage** — search history persists across page refreshes
