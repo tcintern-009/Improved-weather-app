@@ -2,6 +2,8 @@
 
 A modern, responsive weather app built with vanilla JavaScript. Search any city and get current weather, humidity, wind speed, and a 3-day forecast — all with a sleek glassmorphism UI.
 
+# Live Link
+https://tcintern-009.github.io/Improved-weather-app/
 ## Features
 
 - **Search-as-you-type** — start typing and weather updates appear automatically (debounced to avoid too many API calls)
